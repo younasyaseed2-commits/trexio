@@ -1,0 +1,125 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Orders | Trexio</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <style>
+        .bg-trexio { background-color: #0f3171 !important; }
+        .text-trexio { color: #0f3171 !important; }
+    </style>
+</head>
+<body class="bg-light">
+
+<nav class="navbar navbar-dark bg-trexio py-3 shadow-sm">
+    <div class="container">
+        <a class="navbar-brand d-flex align-items-center" href="{% url 'home' %}">
+            <i class="bi bi-arrow-left me-2"></i> Back to Store
+        </a>
+        <a class="navbar-brand ms-auto" href="{% url 'home' %}">
+            <img src="{% static 'store/logo.PNG' %}" alt="Trexio Logo" height="40">
+        </a>
+    </div>
+</nav>
+
+<div class="container mt-5 mb-5">
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}success{% endif %} alert-dismissible fade show shadow-sm">
+                <i class="bi {% if message.tags == 'error' %}bi-exclamation-triangle-fill{% else %}bi-check-circle-fill{% endif %} me-2"></i> {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <h2 class="mb-4 text-trexio fw-bold">Your Order History</h2>
+
+    <div class="row">
+        <div class="col-12">
+            {% for order in orders %}
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center py-3">
+                    <div>
+                        <span class="text-muted small text-uppercase fw-bold">Order Placed</span><br>
+                        <span>{{ order.created_at|date:"M d, Y" }}</span>
+                    </div>
+                    <div>
+                        <span class="text-muted small text-uppercase fw-bold">Total</span><br>
+                        <span class="fw-bold">₹{{ order.total_price }}</span>
+                    </div>
+                    <div class="text-end">
+                        <span class="text-muted small text-uppercase fw-bold">Order ID</span><br>
+                        <span class="text-primary fw-bold">#TRX-00{{ order.id }}</span>
+                    </div>
+                </div>
+                <div class="card-body">
+
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="fw-bold m-0
+                            {% if order.status == 'Pending' %}text-warning
+                            {% elif order.status == 'Cancelled' %}text-danger
+                            {% else %}text-success{% endif %}">
+                            <i class="bi
+                                {% if order.status == 'Pending' %}bi-hourglass-split
+                                {% elif order.status == 'Cancelled' %}bi-x-circle-fill
+                                {% else %}bi-box-seam-fill{% endif %} me-2"></i>
+                            Status: {{ order.status }}
+                        </h5>
+
+                        {% if order.status == 'Pending' %}
+                            <form action="{% url 'cancel_order' order.id %}" method="POST" class="m-0">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill fw-bold px-3" onclick="return confirm('Are you sure you want to cancel this order? This action cannot be undone.');">
+                                    <i class="bi bi-x-circle me-1"></i> Cancel Order
+                                </button>
+                            </form>
+                        {% endif %}
+                    </div>
+
+                    {% for item in order.items.all %}
+                    <div class="d-flex align-items-center mb-3 border-bottom pb-3">
+                        {% if item.product.image %}
+                            <div class="bg-light rounded p-2 me-3" style="width: 70px; height: 70px; display: flex; align-items: center; justify-content: center;">
+                                <img src="{{ item.product.image.url }}" style="max-height: 60px; max-width: 60px; object-fit: contain;">
+                            </div>
+                        {% endif %}
+                        <div>
+                            <h6 class="mb-0 fw-bold">{{ item.product.name }}</h6>
+                            <small class="text-muted">Qty: {{ item.quantity }} | Price: ₹{{ item.price }}</small>
+                        </div>
+                    </div>
+                    {% endfor %}
+
+                    <div class="mt-3 small text-muted bg-light p-3 rounded border">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <strong>Delivery to:</strong><br>
+                                {{ order.address.full_name }}<br>
+                                {{ order.address.street_address }}, {{ order.address.city }}
+                            </div>
+                            <div class="col-md-6 text-md-end mt-3 mt-md-0">
+                                <strong>Payment Method:</strong><br>
+                                {{ order.payment_method }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="text-center py-5">
+                <i class="bi bi-box text-muted" style="font-size: 3rem;"></i>
+                <h4 class="mt-3 text-muted">You haven't placed any orders yet.</h4>
+                <a href="{% url 'home' %}" class="btn btn-warning mt-3 rounded-pill px-4 fw-bold shadow-sm">Start Shopping</a>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

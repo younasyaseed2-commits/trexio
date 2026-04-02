@@ -1,0 +1,261 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trexio Store | Everything you need</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <style>
+        /* YOUR CUSTOM BRAND COLORS */
+        .bg-trexio { background-color: #0f3171 !important; }
+        .text-trexio { color: #0f3171 !important; }
+        .btn-trexio { background-color: #0f3171; color: white; border: none; }
+        .btn-trexio:hover { background-color: #0a2250; color: white; }
+
+        .product-link { text-decoration: none; color: inherit; }
+        .product-link:hover h6 { color: #0f3171; }
+
+        /* Carousel Banner Styling */
+        .carousel-banner { height: 350px; object-fit: cover; object-position: center; border-radius: 12px; }
+        .banner-container { padding-top: 20px; padding-bottom: 20px; }
+
+        /* Star Rating Colors */
+        .star-rating { color: #ffa41c; font-size: 0.9rem; }
+    </style>
+</head>
+<body class="bg-light">
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-trexio py-3 shadow-sm">
+    <div class="container-fluid px-4">
+        <a class="navbar-brand d-flex align-items-center" href="{% url 'home' %}">
+            <img src="{% static 'store/logo.PNG' %}" alt="Trexio Logo" height="40" class="d-inline-block align-text-top">
+        </a>
+
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarMain">
+            <ul class="navbar-nav me-3">
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle text-white" href="#" data-bs-toggle="dropdown">All Categories</a>
+                    <ul class="dropdown-menu">
+                        {% for category in menu_categories %}
+                            <li><a class="dropdown-item" href="{% url 'category_detail' category.slug %}">{{ category.name }}</a></li>
+                        {% endfor %}
+                    </ul>
+                </li>
+            </ul>
+
+            <form class="d-flex mx-auto w-50" action="{% url 'search' %}" method="GET">
+                <input class="form-control rounded-start-pill border-0" type="search" placeholder="Search Trexio..." name="q">
+                <button class="btn btn-warning rounded-end-pill px-4" type="submit"><i class="bi bi-search"></i></button>
+            </form>
+
+            <ul class="navbar-nav ms-auto align-items-center">
+                {% if user.is_authenticated %}
+                    <li class="nav-item dropdown me-3">
+                        <a class="nav-link dropdown-toggle text-white" href="#" data-bs-toggle="dropdown">
+                            Hello, <b>{{ user.username }}</b><br>
+                            <small>Account & Lists</small>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="{% url 'address_book' %}">Your Addresses</a></li>
+                            <li><a class="dropdown-item" href="{% url 'my_orders' %}">Your Orders</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item text-danger" href="{% url 'logout' %}">Sign Out</a></li>
+                        </ul>
+                    </li>
+                {% else %}
+                    <li class="nav-item me-3 d-flex align-items-center">
+                        <a class="nav-link text-white me-3 fw-bold" href="{% url 'login' %}">Sign In</a>
+                    </li>
+                {% endif %}
+
+                <li class="nav-item">
+                    <a class="nav-link text-white d-flex align-items-center" href="{% url 'cart' %}">
+                        <i class="bi bi-cart3 fs-3 text-warning"></i>
+                        <span class="ms-1 fw-bold fs-5">Cart <span class="badge bg-warning text-dark rounded-pill">{{ cart_count }}</span></span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div class="container mt-3">
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-success alert-dismissible fade show shadow-sm"><i class="bi bi-check-circle-fill me-2"></i> {{ message }}<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>
+        {% endfor %}
+    {% endif %}
+
+    {% if not category_name %} <div class="banner-container">
+        <div id="trexioPromoCarousel" class="carousel slide shadow-sm rounded-4 overflow-hidden" data-bs-ride="carousel">
+            <div class="carousel-indicators">
+                <button type="button" data-bs-target="#trexioPromoCarousel" data-bs-slide-to="0" class="active"></button>
+                <button type="button" data-bs-target="#trexioPromoCarousel" data-bs-slide-to="1"></button>
+                <button type="button" data-bs-target="#trexioPromoCarousel" data-bs-slide-to="2"></button>
+            </div>
+            <div class="carousel-inner">
+                <div class="carousel-item active" data-bs-interval="4000">
+                    <div class="w-100 carousel-banner d-flex align-items-center justify-content-center" style="background: linear-gradient(45deg, #0f3171, #1a4a9c); color: white;">
+                        <div class="text-center">
+                            <h1 class="display-4 fw-bold mb-3">Welcome to Trexio</h1>
+                            <p class="fs-4">The best deals on everything you need.</p>
+                            <a href="#" class="btn btn-warning rounded-pill px-4 py-2 fw-bold mt-2">Shop Now</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="carousel-item" data-bs-interval="4000">
+                    <div class="w-100 carousel-banner d-flex align-items-center justify-content-center" style="background: linear-gradient(45deg, #0f3171, #1a4a9c); color: white;">
+                        <div class="text-center">
+                            <h1 class="display-4 fw-bold mb-3">Smart Cleaning Everyday</h1>
+                            <p class="fs-4"></p>
+                        </div>
+                    </div>
+                </div>
+                <div class="carousel-item" data-bs-interval="4000">
+                    <div class="w-100 carousel-banner d-flex align-items-center justify-content-center" style="background: linear-gradient(45deg, #0f3171, #1a4a9c); color: white;">
+                        <div class="text-center">
+                            <h1 class="display-4 fw-bold mb-3">Fast & Free Delivery</h1>
+                            <p class="fs-4">Get your items delivered right to your door.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <button class="carousel-control-prev" type="button" data-bs-target="#trexioPromoCarousel" data-bs-slide="prev">
+                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Previous</span>
+            </button>
+            <button class="carousel-control-next" type="button" data-bs-target="#trexioPromoCarousel" data-bs-slide="next">
+                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Next</span>
+            </button>
+        </div>
+    </div>
+    {% endif %}
+    <h3 class="mb-4 mt-2 text-trexio fw-bold">{% if category_name %} {{ category_name }} {% else %} Top Picks For You {% endif %}</h3>
+
+    <div class="row">
+        {% for product in products %}
+        <div class="col-md-3 mb-4">
+            <div class="card h-100 shadow-sm border-0 position-relative">
+
+                {% if product.discount_price %}
+                    <span class="position-absolute top-0 start-0 badge bg-danger m-2 px-2 py-1 z-1">SALE</span>
+                {% endif %}
+
+                <a href="{% url 'product_detail' product.id %}" class="product-link">
+                    {% if product.image %}
+                        <img src="{{ product.image.url }}" class="card-img-top p-4" style="object-fit: contain; height: 220px; transition: 0.3s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+                    {% endif %}
+                    <div class="card-body pb-2 pt-0">
+                        <h6 class="card-title text-truncate fw-bold mb-1">{{ product.name }}</h6>
+
+                        <div class="star-rating mb-2">
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star-half"></i>
+                            <a href="#" class="text-decoration-none text-primary ms-1 small hover-underline">124</a>
+                        </div>
+
+                        {% if product.discount_price %}
+                            <div class="d-flex align-items-baseline">
+                                <h4 class="fw-bold mb-0 me-2">₹{{ product.discount_price }}</h4>
+                                <small class="text-muted text-decoration-line-through">₹{{ product.price }}</small>
+                            </div>
+                        {% else %}
+                            <h4 class="fw-bold mb-0">₹{{ product.price }}</h4>
+                        {% endif %}
+                        <small class="text-muted d-block mt-1">Get it by Tomorrow</small>
+                    </div>
+                </a>
+                <div class="card-footer bg-white border-top-0 pt-3 pb-3">
+                    <form action="{% url 'add_to_cart' product.id %}" method="POST">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-warning w-100 rounded-pill shadow-sm fw-bold">Add to Cart</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<style>
+    #chat-widget { position: fixed; bottom: 20px; right: 20px; z-index: 1000; font-family: sans-serif; }
+    #chat-bubble { width: 60px; height: 60px; background-color: #0f3171; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; cursor: pointer; box-shadow: 0 4px 8px rgba(0,0,0,0.2); transition: 0.3s; }
+    #chat-bubble:hover { transform: scale(1.1); }
+    #chat-box { width: 350px; height: 450px; background: white; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); display: none; flex-direction: column; overflow: hidden; position: absolute; bottom: 80px; right: 0; }
+    #chat-header { background: #0f3171; color: white; padding: 15px; font-weight: bold; display: flex; justify-content: space-between; align-items: center; }
+    #chat-close { cursor: pointer; font-size: 20px; }
+    #chat-messages { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; background-color: #f8f9fa; }
+    .msg { max-width: 80%; padding: 10px 15px; border-radius: 15px; font-size: 14px; }
+    .msg.bot { background: #e9ecef; color: black; align-self: flex-start; border-bottom-left-radius: 2px; }
+    .msg.user { background: #0f3171; color: white; align-self: flex-end; border-bottom-right-radius: 2px; }
+    #chat-input-area { display: flex; padding: 10px; border-top: 1px solid #ddd; background: white; }
+    #chat-input { flex: 1; border: 1px solid #ddd; border-radius: 20px; padding: 8px 15px; outline: none; }
+    #chat-send { background: #ffc107; color: #000; border: none; border-radius: 50%; width: 40px; height: 40px; margin-left: 10px; cursor: pointer; font-weight: bold; }
+</style>
+
+<div id="chat-widget">
+    <div id="chat-box">
+        <div id="chat-header">
+            <span><i class="bi bi-robot me-2"></i> Trexio Support AI</span>
+            <span id="chat-close">&times;</span>
+        </div>
+        <div id="chat-messages">
+            <div class="msg bot">Hello! I am the Trexio AI assistant. How can I help you with your shopping today?</div>
+        </div>
+        <div id="chat-input-area">
+            <input type="text" id="chat-input" placeholder="Type your question..." onkeypress="handleEnter(event)">
+            <button id="chat-send" onclick="sendMessage()"><i class="bi bi-send-fill"></i></button>
+        </div>
+    </div>
+    <div id="chat-bubble" onclick="toggleChat()">
+        <i class="bi bi-chat-dots-fill"></i>
+    </div>
+</div>
+
+<script>
+    const chatBox = document.getElementById('chat-box');
+    const chatMessages = document.getElementById('chat-messages');
+    const chatInput = document.getElementById('chat-input');
+
+    function toggleChat() { chatBox.style.display = chatBox.style.display === 'flex' ? 'none' : 'flex'; }
+    document.getElementById('chat-close').onclick = toggleChat;
+
+    function handleEnter(e) { if (e.key === 'Enter') sendMessage(); }
+
+    function sendMessage() {
+        const text = chatInput.value.trim();
+        if (!text) return;
+
+        chatMessages.innerHTML += `<div class="msg user">${text}</div>`;
+        chatInput.value = '';
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+
+        setTimeout(() => {
+            let reply = getBotResponse(text.toLowerCase());
+            chatMessages.innerHTML += `<div class="msg bot">${reply}</div>`;
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }, 800);
+    }
+
+    function getBotResponse(input) {
+        if (input.includes('order') || input.includes('track')) return "You can track your orders by clicking on your Account name at the top right, and selecting 'Your Orders'.";
+        if (input.includes('delivery') || input.includes('shipping')) return "We offer FREE delivery on all orders! Standard shipping takes 3-5 business days.";
+        if (input.includes('return') || input.includes('refund')) return "We have a 7-day return policy. Items must be unused and in original packaging.";
+        if (input.includes('hello') || input.includes('hi')) return "Hi there! Looking for something specific today?";
+        return "I'm still learning! If you have a complex issue, please reach out to our human support team at support@trexio.com.";
+    }
+</script>
+</body>
+</html>

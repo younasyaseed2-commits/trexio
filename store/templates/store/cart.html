@@ -1,0 +1,228 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secure Checkout | Trexio</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <style>
+        body { background-color: #f4f6f9; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+
+        /* Trexio Brand Colors */
+        .bg-trexio { background-color: #0f3171 !important; }
+        .text-trexio { color: #0f3171 !important; }
+
+        /* Premium Card Styling */
+        .premium-card { border: none; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); overflow: hidden; }
+        .card-header-premium { background-color: #ffffff; border-bottom: 2px solid #f4f6f9; padding: 20px 25px; }
+
+        /* Payment Selection Cards */
+        .payment-option { display: none; }
+        .payment-card { border: 2px solid #e9ecef; border-radius: 10px; padding: 15px; margin-bottom: 12px; cursor: pointer; transition: all 0.2s ease; display: flex; align-items: center; background-color: white; }
+        .payment-card:hover { border-color: #b0c4de; background-color: #f8fbff; }
+
+        /* Active Payment State Magic */
+        .payment-option:checked + .payment-card { border-color: #0f3171; background-color: #f0f5ff; box-shadow: 0 0 0 1px #0f3171; }
+        .payment-option:checked + .payment-card .check-icon { color: #0f3171; opacity: 1; transform: scale(1); }
+        .check-icon { opacity: 0; transform: scale(0.5); transition: all 0.2s ease; font-size: 1.2rem; margin-left: auto; }
+
+        /* Custom Inputs */
+        .custom-select { border-radius: 8px; border: 1px solid #ced4da; padding: 10px 15px; }
+        .custom-select:focus { border-color: #0f3171; box-shadow: 0 0 0 0.25rem rgba(15, 49, 113, 0.1); }
+
+        /* Big Checkout Button */
+        .btn-checkout { background-color: #ffc107; color: #000; font-weight: 700; border: none; border-radius: 50px; padding: 14px; text-transform: uppercase; letter-spacing: 0.5px; transition: 0.3s; box-shadow: 0 4px 6px rgba(255, 193, 7, 0.3); }
+        .btn-checkout:hover { background-color: #ffb300; transform: translateY(-2px); box-shadow: 0 6px 12px rgba(255, 193, 7, 0.4); }
+    </style>
+</head>
+<body>
+
+<nav class="navbar navbar-dark bg-trexio py-3 shadow-sm mb-4">
+    <div class="container d-flex justify-content-between align-items-center">
+        <a href="{% url 'home' %}" class="text-white text-decoration-none d-flex align-items-center opacity-75 hover-opacity-100 transition">
+            <i class="bi bi-chevron-left me-2"></i> Back to Shop
+        </a>
+        <a class="navbar-brand m-0" href="{% url 'home' %}">
+            <img src="{% static 'store/logo.PNG' %}" alt="Trexio Logo" height="35">
+        </a>
+        <div class="text-white opacity-75">
+            <i class="bi bi-lock-fill me-1"></i> Secure Checkout
+        </div>
+    </div>
+</nav>
+
+<div class="container mb-5">
+
+    <div class="d-flex align-items-center mb-4">
+        <h2 class="fw-bold text-trexio m-0">Checkout</h2>
+        <span class="badge bg-secondary ms-3 rounded-pill px-3 py-2">{{ items.count }} Items</span>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-7">
+            <div class="card premium-card mb-4">
+                <div class="card-header-premium">
+                    <h5 class="mb-0 fw-bold"><i class="bi bi-cart-check me-2 text-trexio"></i> Review Order</h5>
+                </div>
+                <div class="card-body p-0">
+                    {% for item in items %}
+                        <div class="d-flex align-items-center p-4 {% if not forloop.last %}border-bottom{% endif %}">
+                            <div class="bg-light rounded p-2 me-4" style="width: 90px; height: 90px; flex-shrink: 0; display: flex; align-items: center; justify-content: center;">
+                                {% if item.product.image %}
+                                    <img src="{{ item.product.image.url }}" class="img-fluid" style="max-height: 80px; object-fit: contain;">
+                                {% else %}
+                                    <i class="bi bi-image text-muted fs-3"></i>
+                                {% endif %}
+                            </div>
+
+                            <div class="flex-grow-1">
+                                <span class="badge bg-light text-dark mb-2">{{ item.product.category.name }}</span>
+                                <h6 class="mb-1 fw-bold fs-5">{{ item.product.name }}</h6>
+                                <div class="d-flex align-items-center mt-2">
+                                    <span class="fw-bold text-muted bg-light px-3 py-1 rounded-pill me-3 small">Qty: {{ item.quantity }}</span>
+                                    <a href="#" class="text-danger small text-decoration-none fw-bold"><i class="bi bi-trash3 me-1"></i>Remove</a>
+                                </div>
+                            </div>
+
+                            <div class="text-end ms-3">
+                                <h5 class="fw-bold mb-0">₹{{ item.get_total_price }}</h5>
+                            </div>
+                        </div>
+                    {% empty %}
+                        <div class="text-center py-5 p-4">
+                            <div class="bg-light rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
+                                <i class="bi bi-cart-x text-muted fs-1"></i>
+                            </div>
+                            <h4 class="fw-bold text-dark">Your cart is empty</h4>
+                            <p class="text-muted mb-4">Looks like you haven't added anything to your cart yet.</p>
+                            <a href="{% url 'home' %}" class="btn btn-trexio rounded-pill px-5 py-2 fw-bold">Return to Shop</a>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-5">
+            {% if items %}
+
+            <form action="{% url 'cart' %}" method="POST">
+                {% csrf_token %}
+
+                <div class="card premium-card mb-4">
+                    <div class="card-header-premium">
+                        <h5 class="mb-0 fw-bold"><i class="bi bi-geo-alt me-2 text-trexio"></i> Delivery Details</h5>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="mb-4">
+                            <label class="form-label fw-bold text-muted small text-uppercase">Select Address</label>
+                            {% if addresses %}
+                                <select name="address" class="form-select custom-select mb-3" required>
+                                    <option value="" disabled selected>Choose a saved address...</option>
+                                    {% for address in addresses %}
+                                        <option value="{{ address.id }}">
+                                            {{ address.full_name }} — {{ address.street_address }}, {{ address.city }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            {% else %}
+                                <div class="alert alert-warning border-0 bg-warning bg-opacity-10 d-flex align-items-center p-3 rounded-3 mb-3">
+                                    <i class="bi bi-exclamation-circle-fill text-warning fs-4 me-3"></i>
+                                    <div>You need to save a delivery address first.</div>
+                                </div>
+                            {% endif %}
+
+                            <a href="{% url 'address_book' %}" class="btn btn-outline-primary btn-sm rounded-pill px-3 fw-bold">
+                                <i class="bi bi-plus-lg me-1"></i> Add New Address
+                            </a>
+                        </div>
+
+                        <div class="mb-0">
+                            <label class="form-label fw-bold text-muted small text-uppercase">Delivery Notes (Optional)</label>
+                            <textarea name="instructions" class="form-control custom-select" rows="2" placeholder="E.g., Leave package at the back door..."></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card premium-card mb-4">
+                    <div class="card-header-premium">
+                        <h5 class="mb-0 fw-bold"><i class="bi bi-wallet2 me-2 text-trexio"></i> Payment Method</h5>
+                    </div>
+                    <div class="card-body p-4 pb-2">
+
+                        <input type="radio" name="payment_method" value="COD" id="pay-cod" class="payment-option" required checked>
+                        <label for="pay-cod" class="payment-card">
+                            <div class="bg-success bg-opacity-10 p-2 rounded me-3 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                <i class="bi bi-cash-stack text-success fs-5"></i>
+                            </div>
+                            <div>
+                                <h6 class="mb-0 fw-bold">Cash on Delivery</h6>
+                                <small class="text-muted">Pay when you receive</small>
+                            </div>
+                            <i class="bi bi-check-circle-fill check-icon"></i>
+                        </label>
+
+                        <input type="radio" name="payment_method" value="CARD" id="pay-card" class="payment-option" required>
+                        <label for="pay-card" class="payment-card">
+                            <div class="bg-primary bg-opacity-10 p-2 rounded me-3 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                <i class="bi bi-credit-card-2-front text-primary fs-5"></i>
+                            </div>
+                            <div>
+                                <h6 class="mb-0 fw-bold">Credit / Debit Card</h6>
+                                <small class="text-muted">Visa, Mastercard, RuPay</small>
+                            </div>
+                            <i class="bi bi-check-circle-fill check-icon"></i>
+                        </label>
+
+                        <input type="radio" name="payment_method" value="UPI" id="pay-upi" class="payment-option" required>
+                        <label for="pay-upi" class="payment-card">
+                            <div class="bg-info bg-opacity-10 p-2 rounded me-3 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                <i class="bi bi-phone text-info fs-5"></i>
+                            </div>
+                            <div>
+                                <h6 class="mb-0 fw-bold">UPI Payment</h6>
+                                <small class="text-muted">GPay, PhonePe, Paytm</small>
+                            </div>
+                            <i class="bi bi-check-circle-fill check-icon"></i>
+                        </label>
+
+                    </div>
+                </div>
+
+                <div class="card premium-card bg-trexio text-white">
+                    <div class="card-body p-4">
+                        <h5 class="fw-bold border-bottom border-light border-opacity-25 pb-3 mb-3">Order Summary</h5>
+
+                        <div class="d-flex justify-content-between mb-2 text-white-50">
+                            <span>Subtotal</span>
+                            <span class="text-white">₹{{ grand_total }}</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-3 text-white-50">
+                            <span>Shipping Estimate</span>
+                            <span class="text-warning fw-bold">FREE</span>
+                        </div>
+
+                        <div class="d-flex justify-content-between align-items-center mt-4 mb-4">
+                            <span class="fs-5 opacity-75">Total</span>
+                            <span class="fs-2 fw-bold text-warning">₹{{ grand_total }}</span>
+                        </div>
+
+                        <button type="submit" class="btn btn-checkout w-100 fs-5 d-flex justify-content-center align-items-center">
+                            Place Order  <i class="bi bi-lock-fill ms-2 fs-6"></i>
+                        </button>
+                        <p class="text-center small mt-3 mb-0 text-white-50">
+                            By placing your order, you agree to Trexio's Privacy Policy and Terms of Service.
+                        </p>
+                    </div>
+                </div>
+
+            </form>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

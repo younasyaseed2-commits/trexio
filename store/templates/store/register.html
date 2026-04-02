@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Account | Trexio</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <style>
+        /* Custom Trexio Brand Colors */
+        .text-trexio { color: #0f3171 !important; }
+        .btn-trexio { background-color: #0f3171; color: white; border: none; }
+        .btn-trexio:hover { background-color: #0a2250; color: white; }
+    </style>
+</head>
+<body class="bg-light d-flex align-items-center min-vh-100">
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-5">
+
+            <div class="text-center mb-4">
+                <a href="{% url 'home' %}" class="text-trexio text-decoration-none fs-2 fw-bold">TREXIO</a>
+            </div>
+
+            <div class="card shadow-sm border-0">
+                <div class="card-body p-4 p-md-5">
+                    <h3 class="mb-4 fw-normal">Create account</h3>
+
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }} py-2">{{ message }}</div>
+                        {% endfor %}
+                    {% endif %}
+
+                    <form method="POST" action="">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label class="form-label fw-bold small">Email address</label>
+                            <input type="email" name="email" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold small">Mobile number</label>
+                            <input type="text" name="phone" class="form-control" required placeholder="10-digit number">
+                        </div>
+                        <div class="mb-4">
+                            <label class="form-label fw-bold small">Password</label>
+                            <input type="password" name="password" class="form-control" required placeholder="At least 6 characters">
+                        </div>
+
+                        <button type="submit" class="btn btn-trexio w-100 shadow-sm rounded-pill py-2">Verify mobile number & Continue</button>
+                    </form>
+
+                    <hr class="my-4">
+                    <p class="small text-center mb-0">Already have an account? <a href="{% url 'login' %}" class="text-decoration-none fw-bold text-trexio">Sign in <i class="bi bi-caret-right-fill"></i></a></p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
