@@ -28,8 +28,15 @@ DEBUG = True
 
 # settings.py
 
-ALLOWED_HOSTS = ['trexio.onrender.com', '127.0.0.1', 'localhost']
+# settings.py
 
+ALLOWED_HOSTS = [
+    'trexio.in',
+    'www.trexio.in',
+    'trexio.onrender.com',
+    '127.0.0.1',
+    'localhost'
+]
 
 # Application definition
 
