@@ -26,7 +26,9 @@ SECRET_KEY = 'django-insecure-e-#(4!(8-uhuhi-r9ce-!bcr_v*==10sws^pn_31i9p0)7z)8j
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+# settings.py
+
+ALLOWED_HOSTS = ['trexio.onrender.com', '127.0.0.1', 'localhost']
 
 
 # Application definition
