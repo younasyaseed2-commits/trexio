@@ -4,9 +4,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- SEO & Google Search Logo (Favicon) -->
+    <link rel="icon" type="image/png" href="{% static 'store/logo.PNG' %}">
+    <link rel="apple-touch-icon" href="{% static 'store/logo.PNG' %}">
+
     <title>Trexio Store | Everything you need</title>
+
+    <!-- Bootstrap & Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+
     <style>
         /* YOUR CUSTOM BRAND COLORS */
         .bg-trexio { background-color: #0f3171 !important; }
@@ -92,7 +100,8 @@
         {% endfor %}
     {% endif %}
 
-    {% if not category_name %} <div class="banner-container">
+    {% if not category_name %}
+    <div class="banner-container">
         <div id="trexioPromoCarousel" class="carousel slide shadow-sm rounded-4 overflow-hidden" data-bs-ride="carousel">
             <div class="carousel-indicators">
                 <button type="button" data-bs-target="#trexioPromoCarousel" data-bs-slide-to="0" class="active"></button>
@@ -137,6 +146,7 @@
         </div>
     </div>
     {% endif %}
+
     <h3 class="mb-4 mt-2 text-trexio fw-bold">{% if category_name %} {{ category_name }} {% else %} Top Picks For You {% endif %}</h3>
 
     <div class="row">
@@ -187,8 +197,10 @@
     </div>
 </div>
 
+<!-- Scripts -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
+<!-- Chat Widget Styles -->
 <style>
     #chat-widget { position: fixed; bottom: 20px; right: 20px; z-index: 1000; font-family: sans-serif; }
     #chat-bubble { width: 60px; height: 60px; background-color: #0f3171; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; cursor: pointer; box-shadow: 0 4px 8px rgba(0,0,0,0.2); transition: 0.3s; }
