@@ -1,0 +1,121 @@
+﻿{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>TREXIO A5 Slip #{{ order.id }}</title>
+    <style>
+        @page { size: A5; margin: 0; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0; padding: 10mm; background-color: white; width: 128mm;
+        }
+        .slip-container {
+            border: 1.5px solid #0f3171; padding: 8mm; border-radius: 8px;
+            min-height: 180mm; position: relative;
+        }
+        .header-table { width: 100%; border-bottom: 1px solid #ddd; padding-bottom: 10px; }
+        .logo-box { display: flex; align-items: center; gap: 10px; }
+        .logo-img { height: 35px; width: auto; object-fit: contain; }
+        .brand { font-size: 22px; font-weight: bold; color: #0f3171; line-height: 1; }
+
+        /* QR Code Styling */
+        .qr-box {
+            text-align: center; border: 1px solid #eee; padding: 5px;
+            border-radius: 5px; background: #fafafa;
+        }
+        .qr-box img { width: 85px; height: 85px; }
+        .qr-text { font-size: 8px; font-weight: bold; margin-top: 3px; color: #0f3171; }
+
+        .details-grid { margin-top: 15px; font-size: 13px; line-height: 1.4; }
+        .section-title { font-size: 11px; font-weight: bold; color: #777; text-transform: uppercase; margin-top: 10px; }
+
+        .items-table { width: 100%; margin-top: 15px; border-collapse: collapse; font-size: 12px; }
+        .items-table th { text-align: left; border-bottom: 1px solid #0f3171; padding: 5px; color: #0f3171; }
+        .items-table td { padding: 8px 5px; border-bottom: 1px solid #eee; }
+
+        .total-box {
+            margin-top: 15px; text-align: right; padding: 10px;
+            background: #f0f4f8; border-radius: 5px;
+        }
+        .grand-total { font-size: 18px; font-weight: bold; color: #0f3171; }
+
+        .footer {
+            position: absolute; bottom: 8mm; left: 8mm; right: 8mm;
+            text-align: center; font-size: 10px; color: #888;
+            border-top: 1px solid #eee; padding-top: 10px;
+        }
+
+        @media print {
+            .no-print { display: none; }
+            body { padding: 0; }
+            .slip-container { border: 1.5px solid #000; }
+        }
+    </style>
+</head>
+<body>
+    <div class="slip-container">
+        <table class="header-table">
+            <tr>
+                <td>
+                    <div class="logo-box">
+                        <img src="{% static 'store/logo.PNG' %}" class="logo-img" alt="Trexio Logo">
+                        <div class="brand">TREXIO</div>
+                    </div>
+                    <div style="font-size: 12px; font-weight: bold; margin-top: 5px;">ORDER #TRX-00{{ order.id }}</div>
+                    <div style="font-size: 10px; color: #666;">Date: {{ order.created_at|date:"d/m/Y" }}</div>
+                </td>
+                <td align="right">
+                    <div class="qr-box">
+                        <img src="https://quickchart.io/qr?text={{ request.scheme }}://{{ request.get_host }}{% url 'delivery_agent_update' %}?order_id={{ order.id }}&size=150" alt="Delivery Scan">
+                        <div class="qr-text">AGENT ONLY SCAN</div>
+                    </div>
+                </td>
+            </tr>
+        </table>
+
+        <div class="details-grid">
+            <div class="section-title">Shipping To</div>
+            <strong>{{ order.address.full_name }}</strong><br>
+            {{ order.address.street_address }}<br>
+            {{ order.address.city }}, {{ order.address.state }} - {{ order.address.postal_code }}<br>
+            Phone: <strong>{{ order.address.phone_number }}</strong>
+
+            <div class="section-title" style="margin-top: 15px;">Payment Details</div>
+            Method: <strong>{{ order.payment_method }}</strong>
+        </div>
+
+        <table class="items-table">
+            <thead>
+                <tr>
+                    <th>Item Description</th>
+                    <th align="center">Qty</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in order.items.all %}
+                <tr>
+                    <td>{{ item.product.name }}</td>
+                    <td align="center">{{ item.quantity }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <div class="total-box">
+            <span style="font-size: 11px;">TOTAL AMOUNT</span><br>
+            <span class="grand-total">₹{{ order.total_price }}</span>
+        </div>
+
+        <div class="footer">
+            <strong>Trexio.in - Quality Delivered</strong>
+        </div>
+    </div>
+
+    <div style="text-align: center; margin-top: 15px;" class="no-print">
+        <button onclick="window.print()" style="padding: 10px 30px; background: #0f3171; color: white; border: none; border-radius: 5px; font-weight: bold; cursor: pointer;">
+            PRINT A5 SLIP
+        </button>
+    </div>
+</body>
+</html>

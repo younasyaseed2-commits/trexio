@@ -1,0 +1,6 @@
+User-agent: *
+Disallow: /admin/
+Disallow: /trexio-panel/
+Disallow: /cart/
+
+Sitemap: https://trexio.in/sitemap.xml

@@ -3,7 +3,27 @@ from .models import (
     User, Category, Product, ProductGallery,
     Cart, CartItem, Address, Order, OrderItem
 )
+from .models import OrderTracking
+from django.contrib import admin
+from .models import Order, OrderItem, OrderTracking
 
+class OrderItemInline(admin.TabularInline):
+    model = OrderItem
+    extra = 0
+
+@admin.register(Order)
+class OrderAdmin(admin.ModelAdmin):
+    # This makes the admin look professional
+    list_display = ['id', 'user', 'total_price', 'status', 'created_at']
+    list_filter = ['status', 'created_at']
+    search_fields = ['id', 'user__username', 'address__full_name']
+    list_editable = ['status'] # Change status directly from the list!
+    inlines = [OrderItemInline]
+
+@admin.register(OrderTracking)
+class OrderTrackingAdmin(admin.ModelAdmin):
+    list_display = ['order', 'location', 'created_at']
+admin.site.register(OrderTracking)
 # 1. Setup the Gallery to show up inside the Product page
 class ProductGalleryInline(admin.TabularInline):
     model = ProductGallery

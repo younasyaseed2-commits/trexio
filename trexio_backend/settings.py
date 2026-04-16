@@ -62,23 +62,28 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'trexio_backend.urls'
 
+# In trexio_backend/settings.py
+import os
+
+import os
+
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR, 'store', 'templates')], # This is the standard way
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
+                'django.template.context_processors.debug',
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'store.context_processors.menu_categories',
-                'store.context_processors.cart_count',  # <-- ADD THIS NEW LINE!
+                'store.context_processors.cart_count',
             ],
         },
     },
 ]
-
 WSGI_APPLICATION = 'trexio_backend.wsgi.application'
 
 
@@ -151,11 +156,12 @@ MEDIA_ROOT = BASE_DIR / 'media'
 
 # While building the site, print emails to the terminal:
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-
-# (When you launch the real site, you will delete the line above and use these instead:)
-# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-# EMAIL_HOST = 'smtp.gmail.com'
-# EMAIL_PORT = 587
-# EMAIL_USE_TLS = True
-# EMAIL_HOST_USER = 'your-trexio-email@gmail.com'
-# EMAIL_HOST_PASSWORD = 'your-app-password'
+# settings.py configuration for Trexio
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'trexio.business@gmail.com'
+# Do NOT use your regular Gmail password; use the App Password here
+EMAIL_HOST_PASSWORD = 'your-16-character-app-password'
+DEFAULT_FROM_EMAIL = 'Trexio Store <trexio.business@gmail.com>'

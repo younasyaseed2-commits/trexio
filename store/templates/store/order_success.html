@@ -16,6 +16,8 @@
         /* Animation for the checkmark */
         .success-icon { font-size: 5rem; color: #198754; animation: popIn 0.5s ease-out forwards; transform: scale(0); }
         @keyframes popIn { 100% { transform: scale(1); } }
+
+        .alert-custom { background-color: #e7f1ff; border-left: 5px solid #0d6efd; color: #084298; }
     </style>
 </head>
 <body class="bg-light">
@@ -34,8 +36,16 @@
 
             <i class="bi bi-check-circle-fill success-icon mb-3 d-block"></i>
 
-            <h2 class="fw-bold mb-2">Order Placed Successfully!</h2>
-            <p class="text-muted mb-4">Thank you for shopping with Trexio. Your order has been received and is currently being processed.</p>
+            <h2 class="fw-bold mb-2">Order Confirmed!</h2>
+
+            {% if order.payment_method == 'UPI' or order.payment_method == 'Online' %}
+                <div class="alert alert-custom text-start small mb-4 mt-3">
+                    <i class="bi bi-info-circle-fill me-2"></i>
+                    <strong>Payment Proof Received:</strong> Your screenshot has been submitted. Our team will verify the transaction within 2-4 hours and begin processing your shipment.
+                </div>
+            {% else %}
+                <p class="text-muted mb-4">Thank you for shopping with Trexio. Your Cash on Delivery order has been received and is currently being processed.</p>
+            {% endif %}
 
             <div class="bg-light rounded p-3 mb-4 border">
                 <span class="text-muted small text-uppercase fw-bold">Order Reference</span><br>
@@ -52,6 +62,7 @@
                 </a>
             </div>
 
+            <p class="mt-4 small text-muted">A confirmation email has been sent to your registered address.</p>
         </div>
     </div>
 </div>

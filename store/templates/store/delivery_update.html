@@ -1,0 +1,132 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trexio Agent | Smart Logistics</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <script src="https://unpkg.com/html5-qrcode"></script>
+
+    <style>
+        :root { --trexio-blue: #0f3171; --trexio-light: #f0f4f8; --amazon-green: #37b3a9; }
+        body { font-family: 'Inter', sans-serif; background-color: var(--trexio-light); color: #333; }
+
+        .navbar-brand img { filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1)); }
+
+        /* Scanner Styling */
+        #reader { width: 100%; border-radius: 20px; overflow: hidden; border: 4px solid white !important; box-shadow: 0 10px 30px rgba(0,0,0,0.08); }
+        #reader__dashboard_section_csr button { background: var(--trexio-blue) !important; color: white !important; border-radius: 8px !important; border: none !important; padding: 10px 20px !important; margin-top: 10px !important; }
+
+        /* Card UX */
+        .agent-card { border: none; border-radius: 24px; box-shadow: 0 15px 35px rgba(15, 49, 113, 0.08); transition: transform 0.3s ease; }
+        .order-id-badge { background: var(--trexio-blue); color: white; padding: 6px 16px; border-radius: 50px; font-size: 0.8rem; font-weight: 700; letter-spacing: 1px; }
+
+        /* Forms & Buttons */
+        .form-select, .form-control { border-radius: 12px; padding: 12px; border: 2px solid #eef2f6; font-size: 0.95rem; }
+        .form-select:focus { border-color: var(--trexio-blue); box-shadow: none; }
+
+        .btn-update { background: white; color: var(--trexio-blue); border: 2px solid var(--trexio-blue); border-radius: 12px; padding: 12px; font-weight: 700; transition: all 0.3s; }
+        .btn-update:hover { background: var(--trexio-blue); color: white; }
+
+        .btn-deliver { background: var(--amazon-green); color: white; border: none; border-radius: 12px; padding: 16px; font-weight: 700; font-size: 1.1rem; box-shadow: 0 8px 20px rgba(55, 179, 169, 0.3); }
+        .btn-deliver:hover { opacity: 0.9; transform: translateY(-2px); }
+
+        .loading-dots { display: flex; justify-content: center; gap: 5px; margin-top: 10px; }
+        .dot { width: 8px; height: 8px; background: var(--trexio-blue); border-radius: 50%; animation: blink 1.4s infinite both; }
+        .dot:nth-child(2) { animation-delay: 0.2s; }
+        .dot:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes blink { 0%, 80%, 100% { opacity: 0.2; } 40% { opacity: 1; } }
+    </style>
+</head>
+<body>
+
+<nav class="navbar navbar-light bg-white py-3 mb-4 shadow-sm">
+    <div class="container d-flex justify-content-between align-items-center">
+        <a href="{% url 'admin_dashboard' %}" class="btn btn-light rounded-circle"><i class="bi bi-chevron-left"></i></a>
+        <img src="{% static 'store/logo.PNG' %}" alt="Trexio Logo" height="38">
+        <div class="text-trexio fw-bold small">AGENT PORTAL</div>
+    </div>
+</nav>
+
+<div class="container px-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-5">
+            <div class="card agent-card p-2 mb-4">
+                <div id="reader"></div>
+                <div class="p-3 text-center">
+                    <h6 class="fw-bold mb-1">Ready to Scan</h6>
+                    <p class="text-muted small mb-0">Align the packing slip QR code within the frame</p>
+                </div>
+            </div>
+
+            {% if order %}
+            <div class="card agent-card p-4 animate__animated animate__fadeInUp">
+                <div class="d-flex justify-content-between align-items-start mb-4">
+                    <div>
+                        <span class="order-id-badge">ORDER #TRX-{{ order.id }}</span>
+                        <h4 class="fw-bold mt-3 mb-1 text-dark">{{ order.address.full_name }}</h4>
+                        <div class="text-muted small d-flex align-items-center">
+                            <i class="bi bi-geo-alt-fill me-1 text-danger"></i> {{ order.address.city }}, {{ order.address.state }}
+                        </div>
+                    </div>
+                    <div class="text-end">
+                        <div class="text-muted small fw-bold">PAYABLE</div>
+                        <div class="h5 fw-bold text-trexio">₹{{ order.total_price }}</div>
+                    </div>
+                </div>
+
+                <form method="POST">
+                    {% csrf_token %}
+                    <div class="mb-4">
+                        <label class="form-label small fw-bold text-uppercase text-muted">Movement Point</label>
+                        <select name="current_location" class="form-select mb-3">
+                            <option value="Warehouse">Packed & Ready for Dispatch</option>
+                            <option value="Kozhikode Distribution">Arrived at Kozhikode Hub</option>
+                            <option value="Vatakara Hub">Arrived at Vatakara Hub</option>
+                            <option value="Kuttiadi Point">Arrived at Kuttiadi Point</option>
+                            <option value="Out for Delivery">Out for Delivery</option>
+                        </select>
+                        <button type="submit" name="action" value="update_location" class="btn btn-update w-100">
+                            <i class="bi bi-arrow-repeat me-2"></i>UPDATE TRANSIT STATUS
+                        </button>
+                    </div>
+
+                    <div class="pt-2 border-top">
+                        <label class="form-label small fw-bold text-uppercase text-muted mt-3">Final Action</label>
+                        <button type="submit" name="action" value="deliver" class="btn btn-deliver w-100 shadow">
+                            <i class="bi bi-check2-all me-2"></i> COMPLETE DELIVERY
+                        </button>
+                    </div>
+                </form>
+            </div>
+            {% else %}
+            <div class="text-center py-4">
+                <div class="loading-dots">
+                    <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+                </div>
+                <p class="text-muted small mt-3 fw-bold">Awaiting scanning of order QR...</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+    function onScanSuccess(decodedText) {
+        // Stop scanning to indicate success
+        html5QrcodeScanner.clear();
+        // Redirect to decoded URL
+        window.location.href = decodedText;
+    }
+
+    let config = { fps: 15, qrbox: {width: 250, height: 250}, aspectRatio: 1.0 };
+    let html5QrcodeScanner = new Html5QrcodeScanner("reader", config, false);
+    html5QrcodeScanner.render(onScanSuccess);
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -12,13 +12,17 @@
         .bg-trexio { background-color: #0f3171 !important; }
         .text-trexio { color: #0f3171 !important; }
 
-        /* Sidebar Styling (Matches Dashboard & Products) */
+        /* Sidebar Styling */
         #sidebar { min-height: 100vh; background-color: #212529; color: white; padding-top: 20px; box-shadow: 4px 0 10px rgba(0,0,0,0.1); }
         .sidebar-link { color: #adb5bd; text-decoration: none; display: block; padding: 12px 20px; font-weight: 500; transition: 0.3s; }
         .sidebar-link:hover, .sidebar-link.active { background-color: #0f3171; color: white; border-left: 4px solid #ffc107; }
 
         .table-card { border: none; border-radius: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
-        .status-badge { font-size: 0.85rem; padding: 5px 12px; border-radius: 50px; }
+        .btn-print { background-color: #e9ecef; color: #333; border: 1px solid #ddd; }
+        .btn-print:hover { background-color: #dee2e6; color: #000; }
+
+        /* Payment Preview Image */
+        .proof-thumb { width: 40px; height: 40px; object-fit: cover; border-radius: 5px; cursor: pointer; border: 1px solid #ddd; }
     </style>
 </head>
 <body>
@@ -32,11 +36,10 @@
             <a href="{% url 'admin_dashboard' %}" class="sidebar-link"><i class="bi bi-speedometer2 me-2"></i> Dashboard</a>
             <a href="{% url 'admin_orders' %}" class="sidebar-link active"><i class="bi bi-inboxes me-2"></i> Orders</a>
             <a href="{% url 'admin_products' %}" class="sidebar-link"><i class="bi bi-box-seam me-2"></i> Products</a>
-            <a href="{% url 'home' %}" class="sidebar-link mt-5"><i class="bi bi-shop me-2"></i> View Live Store</a>
+            <a href="{% url 'home' %}" class="sidebar-link mt-5" target="_blank"><i class="bi bi-shop me-2"></i> View Live Store</a>
         </div>
 
         <div class="col-md-10 p-4">
-
             {% if messages %}
                 {% for message in messages %}
                     <div class="alert alert-success alert-dismissible fade show border-0 shadow-sm mb-4">
@@ -49,21 +52,9 @@
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <div>
                     <h2 class="fw-bold mb-0">Customer Orders</h2>
-                    <p class="text-muted">Track sales, update shipping status, and manage fulfillment.</p>
+                    <p class="text-muted">Track sales, verify UPI screenshots, and update shipping status.</p>
                 </div>
                 <span class="badge bg-primary rounded-pill px-3 py-2 fs-6">{{ orders.count }} Total Orders</span>
-            </div>
-
-            <div class="card table-card mb-4">
-                <div class="card-body py-2">
-                    <div class="d-flex align-items-center overflow-auto">
-                        <span class="text-muted small fw-bold text-uppercase me-3">Filter:</span>
-                        <a href="#" class="btn btn-sm btn-outline-secondary rounded-pill px-3 me-2 active">All</a>
-                        <a href="#" class="btn btn-sm btn-outline-warning rounded-pill px-3 me-2">Pending</a>
-                        <a href="#" class="btn btn-sm btn-outline-info rounded-pill px-3 me-2">Shipped</a>
-                        <a href="#" class="btn btn-sm btn-outline-success rounded-pill px-3 me-2">Delivered</a>
-                    </div>
-                </div>
             </div>
 
             <div class="card table-card overflow-hidden">
@@ -73,10 +64,11 @@
                             <tr>
                                 <th class="px-4 py-3">Order Details</th>
                                 <th class="py-3">Customer Info</th>
-                                <th class="py-3">Items Purchased</th>
+                                <th class="py-3">Payment Proof</th>
                                 <th class="py-3">Financials</th>
+                                <th class="py-3">Fulfillment</th>
                                 <th class="py-3">Status Action</th>
-                                <th class="px-4 py-3 text-end">Save</th>
+                                <th class="px-4 py-3 text-end">Action</th>
                             </tr>
                         </thead>
                         <tbody class="border-top-0">
@@ -87,35 +79,47 @@
                                     <small class="text-muted">{{ order.created_at|date:"M d, Y" }}</small>
                                 </td>
                                 <td>
-                                    <div class="fw-bold">{{ order.address.full_name }}</div>
-                                    <div class="small text-muted"><i class="bi bi-geo-alt"></i> {{ order.address.city }}</div>
+                                    <div class="fw-bold small">{{ order.address.full_name }}</div>
                                     <div class="small text-muted"><i class="bi bi-telephone"></i> {{ order.address.phone_number }}</div>
                                 </td>
+
                                 <td>
-                                    <div class="dropdown">
-                                        <button class="btn btn-sm btn-light border dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                                            {{ order.items.count }} Items
-                                        </button>
-                                        <ul class="dropdown-menu shadow-sm border-0 p-2">
-                                            {% for item in order.items.all %}
-                                                <li class="small mb-1 border-bottom pb-1">• {{ item.quantity }}x {{ item.product.name }}</li>
-                                            {% endfor %}
-                                        </ul>
-                                    </div>
+                                    {% if order.payment_screenshot %}
+                                        <div class="d-flex align-items-center">
+                                            <a href="{{ order.payment_screenshot.url }}" target="_blank">
+                                                <img src="{{ order.payment_screenshot.url }}" class="proof-thumb me-2" title="Click to enlarge">
+                                            </a>
+                                            <div class="small">
+                                                <span class="text-muted d-block">UTR:</span>
+                                                <span class="fw-bold text-primary">{{ order.transaction_id }}</span>
+                                            </div>
+                                        </div>
+                                    {% elif order.payment_method == 'COD' %}
+                                        <span class="badge bg-light text-dark border">COD Order</span>
+                                    {% else %}
+                                        <span class="text-danger small fw-bold"><i class="bi bi-clock"></i> Awaiting Proof</span>
+                                    {% endif %}
                                 </td>
+
                                 <td>
                                     <div class="fw-bold">₹{{ order.total_price }}</div>
                                     <span class="badge bg-secondary-subtle text-secondary small">{{ order.payment_method }}</span>
+                                </td>
+                                <td>
+                                    <a href="{% url 'print_slip' order.id %}" target="_blank" class="btn btn-sm btn-print rounded-pill px-3 fw-bold">
+                                        <i class="bi bi-printer-fill me-1"></i> Slip
+                                    </a>
                                 </td>
 
                                 <form action="{% url 'update_order_status' order.id %}" method="POST">
                                     {% csrf_token %}
                                     <td>
-                                        <select name="status" class="form-select form-select-sm fw-bold border-0 bg-light shadow-sm" style="width: 150px;">
+                                        <select name="status" class="form-select form-select-sm fw-bold border-0 bg-light shadow-sm" style="width: 140px;">
                                             <option value="Pending" {% if order.status == 'Pending' %}selected{% endif %}>⏳ Pending</option>
                                             <option value="Processing" {% if order.status == 'Processing' %}selected{% endif %}>📦 Processing</option>
                                             <option value="Shipped" {% if order.status == 'Shipped' %}selected{% endif %}>🚚 Shipped</option>
                                             <option value="Delivered" {% if order.status == 'Delivered' %}selected{% endif %}>✅ Delivered</option>
+                                            <option value="Returned" {% if order.status == 'Returned' %}selected{% endif %}>🔄 Returned</option>
                                             <option value="Cancelled" {% if order.status == 'Cancelled' %}selected{% endif %}>❌ Cancelled</option>
                                         </select>
                                     </td>
@@ -126,7 +130,7 @@
                             </tr>
                             {% empty %}
                             <tr>
-                                <td colspan="6" class="text-center py-5 text-muted">
+                                <td colspan="7" class="text-center py-5 text-muted">
                                     <i class="bi bi-inbox fs-1 d-block mb-3"></i>
                                     <h5>No orders have been placed yet.</h5>
                                 </td>
