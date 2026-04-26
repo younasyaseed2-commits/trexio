@@ -221,3 +221,20 @@ def admin_products(request):
     return render(request, 'store/admin_products.html', {'products': Product.objects.all().order_by('-id')})
 
 # END OF TREXIO CORE ENGINE V2.2
+# Add this to store/views.py
+def search_view(request):
+    query = request.GET.get('q', '')
+    if query:
+        products = Product.objects.filter(
+            Q(name__icontains=query) |
+            Q(description__icontains=query) |
+            Q(category__name__icontains=query),
+            is_available=True
+        ).distinct()
+    else:
+        products = Product.objects.none()
+
+    return render(request, 'store/home.html', {
+        'products': products,
+        'category_name': f"Search results for: '{query}'"
+    })

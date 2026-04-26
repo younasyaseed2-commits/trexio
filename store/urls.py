@@ -38,4 +38,6 @@ path('delivery/update/', views.delivery_agent_update, name='delivery_agent_updat
 # Use the trailing slash!
 path('delivery/update/', views.delivery_agent_update, name='delivery_agent_update'),
 path('order/<int:order_id>/', views.order_detail, name='order_detail'),
+
+path('search/', views.search_view, name='search'), # at the start
 ]
