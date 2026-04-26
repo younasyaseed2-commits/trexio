@@ -23,7 +23,7 @@ class OrderAdmin(admin.ModelAdmin):
 @admin.register(OrderTracking)
 class OrderTrackingAdmin(admin.ModelAdmin):
     list_display = ['order', 'location', 'created_at']
-admin.site.register(OrderTracking)
+
 # 1. Setup the Gallery to show up inside the Product page
 class ProductGalleryInline(admin.TabularInline):
     model = ProductGallery
